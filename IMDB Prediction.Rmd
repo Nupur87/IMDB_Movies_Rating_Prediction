@@ -1,0 +1,1104 @@
+---
+title: "IMDB Movies Rating Prediction"
+output: html_document
+---
+
+Importing the Dataset
+```{r}
+films = read.csv("C:\\Users\\Nupur\\Desktop\\McGill Notes\\MGSC661\\Data\\films_fall_2020.csv")
+```
+
+```{r}
+attach(films)
+```
+
+Step 1: Exploring Dataset
+Checking the column names
+```{r}
+names(films)
+```
+Flagging columns that won't have predictive power:
+  -Title
+  -IMDb ID
+  -URL
+Categorical/Descriptive columns (non-numeric):
+  -Title
+  -IMDb ID
+  -URL
+  -Main Language
+  -Main Actor 1 Name
+  -Main Actor 2 Name
+  -Main Actor 3 name
+  -Main Director Name
+  -Main Producer Name
+  -Editor Name
+  -Main Production Company
+  -Main Production Country
+
+Step 2: Exploring Variables Individually
+```{r}
+hist1 = hist(imdb_score, breaks = 75, col = 'cornflowerblue', xlab = "IMDb Score", main = "IMDb Score Frequency")
+box1 = boxplot(imdb_score, col = 'cornflowerblue', outcol = 'black', pch = 16, main = "IMDb Scores")
+quantile(imdb_score, 0.33)
+quantile(imdb_score, 0.5)
+quantile(imdb_score, 0.66)
+summary(imdb_score)
+sd(imdb_score)
+```
+Pretty normal looking distribution (maybe a little right-skewed)
+Many outliers below, but none above
+
+```{r}
+hist2 = hist(budget_in_millions, breaks = 75, col = 'cornflowerblue', main = 'Budget in Millions ($)', xlab = 'Budget')
+box2 = boxplot(budget_in_millions, outcol = 'black', pch = 16, col = 'cornflowerblue', main = 'Budget in Millions ($)')
+quantile(budget_in_millions, 0.95)
+```
+Very right-skewed (few movies get huge budgets)
+Lots of outliers above
+```{r}
+hist3 = hist(year_of_release, breaks = 75, col = 'cornflowerblue', main = 'Year of Release', xlab = 'Year')
+box3 = boxplot(year_of_release, outcol = 'black', pch = 16, col = 'cornflowerblue', main = 'Year of Release')
+```
+
+```{r}
+hist4 = hist(duration_in_hours, breaks = 24, col = 'cornflowerblue', main = 'Duration in Hours', xlab = 'Duration')
+box4 = boxplot(duration_in_hours, pch = 16, col = 'cornflowerblue', main = 'Duration in Hours')
+```
+
+```{r}
+hist5 = hist(total_number_of_actors, breaks = 75, col = 'cornflowerblue', main = 'Total Number of Actors', xlab = 'Count')
+box5 = boxplot(total_number_of_actors, col = 'cornflowerblue', outcol = 'black', pch = 16, main = 'Total Number of Actors')
+```
+
+```{r}
+hist6 = hist(total_number_of_producers, col = 'cornflowerblue', main = 'Total Number of Producers', xlab = 'Count')
+box6 = boxplot(total_number_of_producers, col = 'cornflowerblue', pch = 16, main = 'Total Number of Producers')
+```
+
+```{r}
+hist7 = hist(total_number_of_production_companies, col = 'cornflowerblue', main = 'Total Number of Production Companies', xlab = 'Count')
+box7 = boxplot(total_number_of_production_companies, col = 'cornflowerblue', pch = 16, main = 'Total Number of Production Companies')
+quantile(total_number_of_production_companies)
+```
+
+```{r}
+hist8 = hist(total_number_of_production_countries, col = 'cornflowerblue', main = 'Total Number of Production Countries', xlab = 'Count')
+box8 = boxplot(total_number_of_production_countries, col = 'cornflowerblue', pch = 16, main = 'Total Number of Production Countries')
+```
+
+```{r}
+hist9 = hist(total_number_languages, col = 'cornflowerblue', main = 'Total Number of Languages', xlab = 'Count')
+box9 = boxplot(total_number_languages, col = 'cornflowerblue', pch = 16, main = 'Total Number of Languages', xlab = 'Figure 18')
+```
+
+```{r}
+hist(total_number_of_directors)
+boxplot(total_number_of_directors)
+```
+```{r}
+par(mfrow=c(3, 3))
+hist(imdb_score, breaks = 75, col = 'cornflowerblue', xlab = "Figure 1", main = "IMDb Score Frequency")
+hist(budget_in_millions, breaks = 75, col = 'cornflowerblue', main = 'Budget in Millions ($)', xlab = 'Figure 2')
+hist(year_of_release, breaks = 75, col = 'cornflowerblue', main = 'Year of Release', xlab = 'Figure 3')
+hist(duration_in_hours, breaks = 24, col = 'cornflowerblue', main = 'Duration in Hours', xlab = 'Figure 4')
+hist(total_number_of_actors, breaks = 75, col = 'cornflowerblue', main = 'Total Actors', xlab = 'Figure 5')
+hist(total_number_of_producers, col = 'cornflowerblue', main = 'Total Producers', xlab = 'Figure 6')
+hist(total_number_of_production_companies, col = 'cornflowerblue', main = 'Total Production Companies', xlab = 'Figure 7')
+hist(total_number_of_production_countries, col = 'cornflowerblue', main = 'Total Production Countries', xlab = 'Figure 8')
+hist(total_number_languages, col = 'cornflowerblue', main = 'Total Languages', xlab = 'Figure 9')
+```
+
+```{r}
+par(mfrow = c(3, 3))
+boxplot(imdb_score, col = 'cornflowerblue', outcol = 'black', pch = 16, main = "IMDb Scores", xlab = 'Figure 10')
+boxplot(budget_in_millions, outcol = 'black', pch = 16, col = 'cornflowerblue', main = 'Budget in Millions ($)', xlab = 'Figure 11')
+boxplot(year_of_release, outcol = 'black', pch = 16, col = 'cornflowerblue', main = 'Year of Release', xlab = 'Figure 12') 
+boxplot(duration_in_hours, pch = 16, col = 'cornflowerblue', main = 'Duration in Hours', xlab = 'Figure 13')
+boxplot(total_number_of_actors, col = 'cornflowerblue', outcol = 'black', pch = 16, main = 'Total Actors', xlab = 'Figure 14') 
+boxplot(total_number_of_producers, col = 'cornflowerblue', pch = 16, main = 'Total Producers', xlab = 'Figure 15')
+boxplot(total_number_of_production_companies, col = 'cornflowerblue', pch = 16, main = 'Total Production Companies', xlab = 'Figure 16')
+boxplot(total_number_of_production_countries, col = 'cornflowerblue', pch = 16, main = 'Total Production Countries', xlab = 'Figure 17')
+boxplot(total_number_languages, col = 'cornflowerblue', pch = 16, main = 'Total Languages', xlab = 'Figure 18') 
+```
+
+```{r}
+par(mfrow = c(2, 2))
+hist(imdb_score, breaks = 75, col = 'cornflowerblue', xlab = "Figure 1", main = "IMDb Score Frequency")
+hist(budget_in_millions, breaks = 75, col = 'cornflowerblue', main = 'Budget in Millions ($)', xlab = 'Figure 2')
+hist(year_of_release, breaks = 75, col = 'cornflowerblue', main = 'Year of Release', xlab = 'Figure 3')
+hist(duration_in_hours, breaks = 24, col = 'cornflowerblue', main = 'Duration in Hours', xlab = 'Figure 4')
+```
+```{r}
+par(mfrow = c(2, 2))
+hist(total_number_of_actors, breaks = 75, col = 'cornflowerblue', main = 'Total Actors', xlab = 'Figure 5')
+hist(total_number_of_producers, col = 'cornflowerblue', main = 'Total Producers', xlab = 'Figure 6')
+hist(total_number_of_production_companies, col = 'cornflowerblue', main = 'Total Production Companies', xlab = 'Figure 7')
+hist(total_number_of_production_countries, col = 'cornflowerblue', main = 'Total Production Countries', xlab = 'Figure 8')
+```
+```{r}
+par(mfrow = c(2, 2))
+hist(total_number_languages, col = 'cornflowerblue', main = 'Total Languages', xlab = 'Figure 9')
+boxplot(imdb_score, col = 'cornflowerblue', outcol = 'black', pch = 16, main = "IMDb Scores", xlab = 'Figure 10')
+boxplot(budget_in_millions, outcol = 'black', pch = 16, col = 'cornflowerblue', main = 'Budget in Millions ($)', xlab = 'Figure 11')
+boxplot(year_of_release, outcol = 'black', pch = 16, col = 'cornflowerblue', main = 'Year of Release', xlab = 'Figure 12') 
+```
+```{r}
+par(mfrow = c(2, 2))
+boxplot(duration_in_hours, pch = 16, col = 'cornflowerblue', main = 'Duration in Hours', xlab = 'Figure 13')
+boxplot(total_number_of_actors, col = 'cornflowerblue', outcol = 'black', pch = 16, main = 'Total Actors', xlab = 'Figure 14') 
+boxplot(total_number_of_producers, col = 'cornflowerblue', pch = 16, main = 'Total Producers', xlab = 'Figure 15')
+boxplot(total_number_of_production_companies, col = 'cornflowerblue', pch = 16, main = 'Total Production Companies', xlab = 'Figure 16')
+```
+```{r}
+par(mfrow = c(2, 2))
+boxplot(total_number_of_production_countries, col = 'cornflowerblue', pch = 16, main = 'Total Production Countries', xlab = 'Figure 17')
+boxplot(total_number_languages, col = 'cornflowerblue', pch = 16, main = 'Total Languages', xlab = 'Figure 18') 
+```
+
+
+General Notes:
+-Scores look about normally distributed with mean at roughly 6.8
+-Budget is VERY right-skewed (lots more movies with low budget)
+-Year of release is left-skewed (many more new movies - after 2000)
+-Duration is right-skewed (most movies around 1.5-2 hours)
+-Most movies have 1-50 actors, but many outliers above (big budget movies, probably)
+-Vast majority of movies have 1 language, 1 director
+-Total number of producers is right-skewed
+-Most films have 1-5 production companies (but a number of positive outliers)
+-Most films have 1 production country
+
+
+Right-Skewed:
+-Budget
+-Actors
+-Producers
+-Production Companies
+-Production Countries
+-Number of languages
+
+Left-Skewed:
+-Year of release
+
+Normal(ish):
+-Scores
+
+Correlation Matrix with All Quantitative Variables
+```{r}
+names(films)
+```
+```{r}
+quantvars = films[, c(4, 5, 6, 7, 8, 10, 41, 44, 46, 49, 51)] #Not including dummy variables
+corr_matrix  = cor(quantvars)
+corr_matrix
+```
+Doesn't seem to be much correlation in the dataset (rule of thumb is collinearity becomes a problem when variables have ~0.80-0.85 correlation, and nothing is close to that)
+
+
+
+Step 3: Exploring Relationships
+
+```{r}
+lm_budget = lm(imdb_score~budget_in_millions)
+lm_month = lm(imdb_score~month_of_release)
+lm_year = lm(imdb_score~year_of_release)
+lm_duration = lm(imdb_score~duration_in_hours)
+lm_language_count = lm(imdb_score~total_number_languages)
+lm_actor_count = lm(imdb_score~total_number_of_actors)
+lm_director_count = lm(imdb_score~total_number_of_directors)
+lm_producer_count = lm(imdb_score~total_number_of_producers)
+lm_production_comp_count = lm(imdb_score~total_number_of_production_companies)
+lm_production_country_count = lm(imdb_score~total_number_of_production_countries)
+```
+
+Getting visualization of each of these regressions individually, and checking their residuals
+```{r}
+library(visreg)
+library(car)
+```
+
+Budget
+Non-linear
+```{r}
+visreg(lm_budget, alpha = 0.05)
+summary(lm_budget)
+residualPlots(lm_budget)
+```
+
+Month
+Borderline
+```{r}
+visreg(lm_month, alpha = 0.05)
+summary(lm_month)
+residualPlots(lm_month)
+```
+
+Year
+Non-linear
+```{r}
+visreg(lm_year, alpha = 0.05)
+summary(lm_year)
+residualPlots(lm_year)
+```
+
+Duration
+Non-linear
+```{r}
+visreg(lm_duration, alpha = 0.05)
+summary(lm_duration)
+residualPlots(lm_duration)
+```
+
+Language Count
+Non-linear
+```{r}
+visreg(lm_language_count, alpha = 0.05)
+summary(lm_language_count)
+residualPlots(lm_language_count)
+```
+
+Actor Count
+Non-linear
+```{r}
+visreg(lm_actor_count, alpha = 0.05)
+summary(lm_actor_count)
+residualPlots(lm_actor_count)
+```
+
+Director Count
+Linear
+```{r}
+visreg(lm_director_count, alpha = 0.05)
+summary(lm_director_count)
+residualPlots(lm_director_count)
+```
+
+Producer Count
+Non-Linear
+```{r}
+visreg(lm_producer_count, alpha = 0.05)
+summary(lm_producer_count)
+residualPlots(lm_producer_count)
+```
+
+Production Company Count
+Borderline Linear
+```{r}
+visreg(lm_production_comp_count, alpha = 0.05)
+summary(lm_production_comp_count)
+residualPlots(lm_production_comp_count)
+```
+
+Production Country Count
+Linear
+```{r}
+visreg(lm_production_country_count, alpha = 0.05)
+summary(lm_production_country_count)
+residualPlots(lm_production_country_count)
+```
+
+
+Plotting Scatterplots and LOESS curves for variables
+
+```{r}
+library(ggplot2)
+library(splines)
+library(ggpubr)
+```
+
+Non-Linear:
+Getting 4 knots by quantile for a given predictor
+```{r}
+get_knots = function(x){
+  k1 = quantile(x, 0.2)
+  k2 = quantile(x, 0.4)
+  k3 = quantile(x, 0.6)
+  k4 = quantile(x, 0.8)
+  return(c(k1, k2, k3, k4))
+}
+```
+
+Budget
+```{r}
+plot = ggplot(films, aes(x = budget_in_millions, y = imdb_score))
+scatter = geom_point(color = 'cornflowerblue')
+line = geom_smooth(method = 'loess', formula = y~x, span = 0.2, color = 'coral2')
+
+ks = get_knots(budget_in_millions)
+
+spline1=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=1), aes(color="red"))
+spline2=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=2), aes(color='blue'))
+spline3=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=3), aes(color='green'))
+spline4=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=4), aes(color='purple'))
+spline6 = geom_smooth(method = "lm", formula = y~bs(x, knots = knot(budget_in_millions, 6), degree = 4), aes(color = "gold"))
+legend=scale_color_identity(name = "Splines", breaks = c("red", "blue", "green", "purple", "gold"),labels = c("d=1", "d=2", "d=3", "d=4", "d=6, k=6"),guide = 'legend')
+
+plot+scatter+spline1+line+legend #Looks best
+plot+scatter+spline2+line+legend
+plot+scatter+spline3+line+legend
+plot+scatter+spline4+line+legend
+plot+scatter+spline6+line+legend
+
+plot1 = plot+scatter+line+ylab('')+xlab("Budget in Millions")
+plot1
+```
+
+
+Year of Release
+```{r}
+plot = ggplot(films, aes(x = year_of_release, y = imdb_score))
+scatter = geom_point(color = 'cornflowerblue')
+line = geom_smooth(method = 'loess', formula = y~x, span = 0.2, color = 'coral2')
+
+ks = get_knots(year_of_release)
+
+spline1=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=1), aes(color="red"))
+spline2=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=2), aes(color='blue'))
+spline3=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=3), aes(color='green'))
+spline4=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=4), aes(color='purple'))
+legend=scale_color_identity(name = "Splines", breaks = c("red", "blue", "green", "purple"),labels = c("d=1", "d=2", "d=3", "d=4"),guide = 'legend')
+
+plot+scatter+spline1+line+legend 
+plot+scatter+spline2+line+legend
+plot+scatter+spline3+line+legend
+plot+scatter+spline4+line+legend #Best (both 2 and 3 look good, as well)
+
+plot2 = plot+scatter+line+ylab('')+xlab("Year of Release")
+```
+
+Duration in Hours
+```{r}
+plot = ggplot(films, aes(x = duration_in_hours, y = imdb_score))
+scatter = geom_point(color = 'cornflowerblue')
+line = geom_smooth(method = 'loess', formula = y~x, span = 0.2, color = 'coral2')
+
+ks = get_knots(duration_in_hours)
+
+spline1=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=1), aes(color="red"))
+spline2=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=2), aes(color='blue'))
+spline3=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=3), aes(color='green'))
+spline4=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=4), aes(color='purple'))
+legend=scale_color_identity(name = "Splines", breaks = c("red", "blue", "green", "purple"),labels = c("d=1", "d=2", "d=3", "d=4"),guide = 'legend')
+
+plot+scatter+line+spline1+legend
+plot+scatter+spline2+line+legend #also good
+plot+scatter+spline3+line+legend
+plot+scatter+spline4+line+legend #Looks best
+
+plot3 = plot+scatter+line+ylab('')+xlab("Duration in Hours")
+```
+
+Number of Actors
+```{r}
+plot = ggplot(films, aes(x = total_number_of_actors, y = imdb_score))
+scatter = geom_point(color = 'cornflowerblue')
+line = geom_smooth(method = 'loess', formula = y~x, span = 0.2, color = 'coral2')
+
+ks = get_knots(total_number_of_actors)
+
+spline1=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=1), aes(color="red"))
+spline2=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=2), aes(color='blue'))
+spline3=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=3), aes(color='green'))
+spline4=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=4), aes(color='purple'))
+legend=scale_color_identity(name = "Splines", breaks = c("red", "blue", "green", "purple"),labels = c("d=1", "d=2", "d=3", "d=4"),guide = 'legend')
+
+plot+scatter+line+spline1+legend
+plot+scatter+spline2+line+legend #2 or 3 very good
+plot+scatter+spline3+line+legend
+plot+scatter+spline4+line+legend 
+
+plot4 = plot+scatter+line+ylab('')+xlab("Total Actors")
+```
+
+Number of Producers
+```{r}
+plot = ggplot(films, aes(x = total_number_of_producers, y = imdb_score))
+scatter = geom_point(color = 'cornflowerblue')
+line = geom_smooth(method = 'loess', formula = y~x, span = 0.6, color = 'coral2')
+
+ks = get_knots(total_number_of_producers)
+
+spline1=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=1), aes(color="red"))
+spline2=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=2), aes(color='blue'))
+spline3=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=3), aes(color='green'))
+spline4=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=4), aes(color='purple'))
+legend=scale_color_identity(name = "Splines", breaks = c("red", "blue", "green", "purple"),labels = c("d=1", "d=2", "d=3", "d=4"),guide = 'legend')
+
+plot+scatter+spline1+line+legend #Best
+plot+scatter+spline2+line+legend 
+plot+scatter+spline3+line+legend
+plot+scatter+spline4+line+legend 
+
+plot5 = plot+scatter+line+ylab('')+xlab("Total Producers")
+```
+
+
+
+Borderline:
+
+Month of Release
+```{r}
+plot = ggplot(films, aes(x = month_of_release, y = imdb_score))
+scatter = geom_point(color = 'cornflowerblue')
+line = geom_smooth(method = 'loess', formula = y~x, span = 0.3, color = 'coral2')
+
+ks = get_knots(month_of_release)
+
+spline1=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=1), aes(color="red"))
+spline2=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=2), aes(color='blue'))
+spline3=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=3), aes(color='green'))
+spline4=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=4), aes(color='purple'))
+legend=scale_color_identity(name = "Splines", breaks = c("red", "blue", "green", "purple"),labels = c("d=1", "d=2", "d=3", "d=4"),guide = 'legend')
+
+plot+scatter+spline1+line+legend
+plot+scatter+spline2+line+legend 
+plot+scatter+spline3+line+legend #Best
+plot+scatter+spline4+line+legend 
+
+plot6 = plot+scatter+line+ylab('')+xlab("Month of Release")
+```
+
+Number of Production Companies
+```{r}
+plot = ggplot(films, aes(x = total_number_of_production_companies, y = imdb_score))
+scatter = geom_point(color = 'cornflowerblue')
+line = geom_smooth(method = 'loess', formula = y~x, span = 0.7, color = 'coral2')
+
+ks = get_knots(total_number_of_production_companies)
+
+spline1=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=1), aes(color="red"))
+spline2=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=2), aes(color='blue'))
+spline3=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=3), aes(color='green'))
+spline4=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=4), aes(color='purple'))
+legend=scale_color_identity(name = "Splines", breaks = c("red", "blue", "green", "purple"),labels = c("d=1", "d=2", "d=3", "d=4"),guide = 'legend')
+
+plot+scatter+spline1+line+legend
+plot+scatter+spline2+line+legend #Best
+plot+scatter+spline3+line+legend
+plot+scatter+spline4+line+legend 
+
+plot7 = plot+scatter+line+ylab('')+xlab("Total Production Companies")
+```
+
+
+Linear:
+Number of Languages
+```{r}
+plot = ggplot(films, aes(x = total_number_languages, y = imdb_score))
+scatter = geom_point(color = 'cornflowerblue')
+line = geom_smooth(method = 'loess', formula = y~x, span = 0.75, color = 'coral2')
+
+ks = get_knots(total_number_languages)
+
+spline1=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=1), aes(color="red"))
+spline2=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=2), aes(color='blue'))
+spline3=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=3), aes(color='green'))
+spline4=geom_smooth(method = "lm", formula = y~bs(x,knots=ks, degree=4), aes(color='purple'))
+legend=scale_color_identity(name = "Splines", breaks = c("red", "blue", "green", "purple"),labels = c("d=1", "d=2", "d=3", "d=4"),guide = 'legend')
+
+plot+scatter+spline1+line+legend
+plot+scatter+spline2+line+legend #Probably best (but, can be modeled linearly)
+plot+scatter+spline3+line+legend
+plot+scatter+spline4+line+legend 
+
+plot8 = plot+scatter+line+ylab('')+xlab("Total Languages")
+```
+
+Number of Directors
+```{r}
+plot = ggplot(films, aes(x = total_number_of_directors, y = imdb_score))
+scatter = geom_point(color = 'cornflowerblue')
+line = geom_smooth(method = 'loess', formula = y~x, span = 1, color = 'coral2')
+plot+scatter+line
+
+plot9 = plot+scatter+line+ylab('')+xlab("Total Directors")
+```
+
+Number of Production Countries
+```{r}
+plot = ggplot(films, aes(x = total_number_of_production_countries, y = imdb_score))
+scatter = geom_point(color = 'cornflowerblue')
+line = geom_smooth(method = 'loess', formula = y~x, span = 0.8, color = 'coral2')
+plot+scatter+line
+
+plot10 = plot+scatter+line+ylab('')+xlab("Total Production Countries")
+```
+
+```{r}
+ggarrange(plot1, plot2, plot3, plot4, plot5, plot6, plot7, plot8, plot10, ncol = 3, nrow = 3, labels = c("Fig. 19", "Fig. 20", "Fig. 21", "Fig. 22", "Fig. 23", "Fig. 24", "Fig. 25", "Fig. 26", "Fig. 27"), font.label = list(size = 9))
+ggarrange(plot1, plot2, plot3, plot4, ncol = 2, nrow = 2, labels = c("Fig. 19", "Fig. 20", "Fig. 21", "Fig. 22"), font.label = list(size = 9))
+ggarrange(plot5, plot6, plot7, plot8, ncol = 2, nrow = 2, labels = c("Fig. 25", "Fig. 26", "Fig. 27", "Fig. 28"), font.label = list(size = 9))
+ggarrange(plot10, plot9, ncol = 2, nrow = 2, labels = c("Fig. 23", "Fig. 24"), font.label = list(size = 9))
+```
+
+
+
+Correlation Heat Map with Quantative Variables:
+```{r}
+library(reshape2)
+corr_matrix = round(corr_matrix, 3)
+```
+```{r}
+melted_cormat = melt(corr_matrix)
+cor_heat_map = ggplot(melted_cormat, aes(x = Var1, y = Var2, fill = value)) + geom_tile()
+cor_heat_map+theme(axis.text.x = element_text(angle = 20))
+```
+
+```{r}
+quant2 = films[, -c(1, 2, 3, 4, 9, 27, 30, 35, 37, 39, 42, 45, 47, 48, 50)]
+corr_matrix2 = round(cor(quant2), 3)
+melted_cormat2 = melt(corr_matrix2)
+cor_heat_map2 = ggplot(data = melted_cormat2, aes(x = Var1, y = Var2, fill = value))+geom_tile()+theme(axis.text.x = element_blank(), axis.text.y = element_blank())
+cor_heat_map2
+```
+
+Getting the names of all continuous and binary regressors
+```{r}
+quant_names = names(films)[-c(1, 2, 3, 4, 9, 35, 37, 39, 42, 45, 47, 48, 50)]
+```
+```{r}
+allModelsList = lapply(paste("imdb_score~", quant_names), as.formula)
+allModelsResults = lapply(allModelsList, function(x){lm(x)})
+
+allModelsSummaries = lapply(allModelsResults, summary)
+```
+
+
+DATAFRAME WHICH CONTAINS COEFFICIENTS, RSQUARE, and NCV FOR EACH LINEAR MODEL
+```{r}
+allModelIntCoefs = c()
+allModelVarCoefs = c()
+varName = c()
+rSquare = c()
+NCV_p = c()
+
+for (i in 1:38){
+  allModelIntCoefs = c(allModelIntCoefs, allModelsSummaries[[i]]$coefficients[, 1][1])
+  allModelVarCoefs = c(allModelVarCoefs, allModelsSummaries[[i]]$coefficients[, 1][2])
+  varName = c(varName, names(allModelsResults[[i]]$coefficients[2]))
+  rSquare = c(rSquare, allModelsSummaries[[i]]$r.squared)
+  
+  temp_model = lm(allModelsList[[i]])
+  ncvp = ncvTest(temp_model)$p
+  NCV_p = c(NCV_p, round(ncvp, 5))
+}
+
+df = data.frame(varName, allModelVarCoefs, rSquare, NCV_p, allModelIntCoefs)
+```
+
+
+Running ANOVA on various predictors to determine optimal polynomial degree
+```{r}
+anova_test = function(x){
+  model1 = lm(imdb_score~x)
+  model2 = lm(imdb_score~poly(x, 2))
+  model3 = lm(imdb_score~poly(x, 3))
+  model4 = lm(imdb_score~poly(x, 4))
+  model5 = lm(imdb_score~poly(x, 5))
+  model6 = lm(imdb_score~poly(x, 6))
+  model7 = lm(imdb_score~poly(x, 7))
+  model8 = lm(imdb_score~poly(x, 8))
+  model9 = lm(imdb_score~poly(x, 9))
+  return(anova(model1, model2, model3, model4, model5, model6, model7, model8, model9))
+}
+```
+Budget
+```{r}
+anova_test(budget_in_millions)
+#Degree 5
+```
+Year of Release
+```{r}
+anova_test(year_of_release)
+#d = 3
+```
+Duration in Hours
+```{r}
+anova_test(duration_in_hours)
+#d = 5
+```
+Total Actors
+```{r}
+anova_test(total_number_of_actors)
+#d = 3
+```
+Total Producers
+```{r}
+anova_test(total_number_of_producers)
+#d = 7
+```
+
+MODEL SELECTION SECTION
+
+Linear Regression of all numerical predictors 
+```{r}
+## Linear Regression##
+
+lm_budget = lm(imdb_score~budget_in_millions)
+coef(lm_budget)
+summary(lm_budget)
+plot(budget_in_millions, imdb_score)
+abline(lm_budget)
+library(visreg)
+visreg(lm_budget,alpha=0.05)
+residualPlots(lm_budget)
+
+library(stargazer)
+
+stargazer(lm_budget,title="Linear Regression Results",
+          align=TRUE, dep.var.labels=c("IMDB Score"),
+          covariate.labels = "Budget in Millions",
+          notes.label ="Significance Levels",
+          type = "html", out = "models.htm")
+
+
+lm_month = lm(imdb_score~month_of_release)
+coef(lm_month)
+summary(lm_month)
+plot(month_of_release, imdb_score)
+abline(lm_month)
+visreg(lm_month,alpha=0.05)
+residualPlots(lm_month)
+
+
+stargazer(lm_month,title="Linear Regression Results",
+          align=TRUE, dep.var.labels=c("IMDB Score"),
+          covariate.labels = "Month of Release",
+          notes.label ="Significance Levels",
+          type = "html", out = "models.htm")
+
+lm_lang = lm(imdb_score~total_number_languages)
+coef(lm_lang)
+summary(lm_lang)
+visreg(lm_lang,alpha=0.05)
+residualPlots(lm_lang)
+
+stargazer(lm_lang,title="Linear Regression Results",
+          align=TRUE, dep.var.labels=c("IMDB Score"),
+          covariate.labels = "Total Number of Languages",
+          notes.label ="Significance Levels",
+          type = "html", out = "models.htm")
+
+
+lm_comp = lm(imdb_score~total_number_of_production_companies)
+coef(lm_comp)
+summary(lm_comp)
+visreg(lm_comp,alpha=0.05)
+residualPlots(lm_comp)
+
+stargazer(lm_comp,title="Linear Regression Results",
+          align=TRUE, dep.var.labels=c("IMDB Score"),
+          covariate.labels = "Total Number of Production Companies",
+          notes.label ="Significance Levels",
+          type = "html", out = "models.htm")
+
+lm_year = lm(imdb_score~year_of_release)
+coef(lm_year)
+summary(lm_year)
+plot(year_of_release,imdb_score)
+abline(lm_year)
+visreg(lm_year,alpha =0.05)
+residualPlots(lm_year)
+
+stargazer(lm_year,title="Linear Regression Results",
+          align=TRUE, dep.var.labels=c("IMDB Score"),
+          covariate.labels = "Year of Release",
+          notes.label ="Significance Levels",
+          type = "html", out = "models.htm")
+
+lm_duration = lm(imdb_score~duration_in_hours)
+coef(lm_duration)
+summary(lm_duration)
+plot(duration_in_hours,imdb_score)
+abline(lm_duration)
+visreg(lm_duration,alpha = 0.05)
+residualPlots(lm_duration)
+
+stargazer(lm_duration,title="Linear Regression Results",
+          align=TRUE, dep.var.labels=c("IMDB Score"),
+          covariate.labels = "Duration in Hours",
+          notes.label ="Significance Levels",
+          type = "html", out = "models.htm")
+
+
+lm_actors = lm(imdb_score~total_number_of_actors)
+coef(lm_actors)
+summary(lm_actors)
+visreg(lm_actors,alpha = 0.05)
+residualPlots(lm_actors)
+
+stargazer(lm_actors,title="Linear Regression Results",
+          align=TRUE, dep.var.labels=c("IMDB Score"),
+          covariate.labels = "Total Number of Actors",
+          notes.label ="Significance Levels",
+          type = "html", out = "models.htm")
+
+lm_directors = lm(imdb_score~total_number_of_directors)
+coef(lm_directors)
+summary(lm_directors)
+visreg(lm_directors,alpha = 0.05)
+residualPlots(lm_directors)
+
+stargazer(lm_directors,title="Linear Regression Results",
+          align=TRUE, dep.var.labels=c("IMDB Score"),
+          covariate.labels = "Total Number of Directors",
+          notes.label ="Significance Levels",
+          type = "html", out = "models.htm")
+
+lm_producers = lm(imdb_score~total_number_of_producers)
+coef(lm_producers)
+summary(lm_producers)
+visreg(lm_producers,alpha = 0.05)
+residualPlots(lm_producers)
+
+stargazer(lm_producers,title="Linear Regression Results",
+          align=TRUE, dep.var.labels=c("IMDB Score"),
+          covariate.labels = "Total Number of Producers",
+          notes.label ="Significance Levels",
+          type = "html", out = "models.htm")
+
+
+lm_country = lm(imdb_score~total_number_of_production_countries)
+coef(lm_country)
+summary(lm_country)
+visreg(lm_country,alpha = 0.05)
+residualPlots(lm_country)
+
+stargazer(lm_country,title="Linear Regression Results",
+          align=TRUE, dep.var.labels=c("IMDB Score"),
+          covariate.labels = "Total Number of Production Countries",
+          notes.label ="Significance Levels",
+          type = "html", out = "models.htm")
+
+```
+Dummify Categorical Variables
+```{r}
+genre = c("genre_action","genre_adventure","genre_animation","genre_biography","genre_comedy","genre_crime","genre_documentary",
+          "genre_drama","genre_family","genre_fantasy","genre_filmnoir","genre_history","genre_horror","genre_music","genre_musical",
+          "genre_mystery","genre_realitytv","genre_romance","genre_scifi","genre_shortfilm","genre_sport","genre_thriller",
+          "genre_war","genre_western")
+
+#have not converted genre_realitytv and shortfilm into factor levels as they have only one level entry.
+
+for (i in 1:24){
+  movies[,10+i] = as.factor(movies[,10+i])
+}
+attach(movies)
+levels(genre_animation)
+
+movies$main_actor1_is_female = as.factor(movies$main_actor1_is_female)
+movies$main_actor2_is_female = as.factor(movies$main_actor2_is_female)
+movies$main_actor3_is_female = as.factor(movies$main_actor3_is_female)
+movies$main_director_is_female = as.factor(movies$main_director_is_female)
+attach(movies)
+levels(main_actor1_is_female)
+```
+Multiple Linear Regression for Feature Selection
+
+```{r}
+##Multiple Linear Regression to check the significance of variables ##
+lm_all = lm(imdb_score~budget_in_millions+month_of_release+year_of_release+duration_in_hours+total_number_languages+
+              genre_action+genre_adventure+genre_animation+genre_biography+genre_comedy+genre_crime+genre_documentary+
+              genre_drama+genre_family+genre_fantasy+genre_filmnoir+genre_history+genre_horror+genre_music+genre_musical+
+              genre_mystery+genre_romance+genre_scifi+genre_sport+genre_thriller+
+              genre_war+genre_western+main_actor1_is_female+main_actor2_is_female+main_actor3_is_female+total_number_of_actors+
+              total_number_of_directors+total_number_of_producers+total_number_of_production_companies+total_number_of_production_countries+
+              main_director_is_female)
+#have not converted genre_realitytv and shortfilm into factor levels as they have only one level entry.          
+summary(lm_all)
+
+#removing biography, filmnoir, music, musical,scifi, sport,thriller, war, western, total number of director,production country,
+#main director female as their p-value is not significant
+lm_all = lm(imdb_score~budget_in_millions+month_of_release+year_of_release+duration_in_hours+total_number_languages+
+              genre_action+genre_adventure+genre_animation+genre_comedy+genre_crime+genre_documentary+
+              genre_drama+genre_family+genre_fantasy+genre_history+genre_horror+
+              genre_mystery+genre_romance+main_actor1_is_female+main_actor2_is_female+main_actor3_is_female+
+              total_number_of_actors+total_number_of_producers+total_number_of_production_companies+total_number_of_producers)
+summary(lm_all)
+
+#removing crime, fantacy, mystery as their p-value is not significant
+lm_all = lm(imdb_score~budget_in_millions+month_of_release+year_of_release+duration_in_hours+total_number_languages+
+              genre_action+genre_adventure+genre_animation+genre_comedy+genre_documentary+
+              genre_drama+genre_family+genre_history+genre_horror+genre_romance+main_actor1_is_female+
+              main_actor2_is_female+main_actor3_is_female+total_number_of_actors+total_number_of_producers+
+              total_number_of_production_companies+total_number_of_producers)
+summary(lm_all)
+#removing genre_adventure, total num of lang,main actor 3 female, total num of producers, total production companies
+
+
+#FINAL FEATURES FROM MULTIPLE REGRESSION FEATURE SELECTION PROCESS 
+lm_all = lm(imdb_score~budget_in_millions+month_of_release+year_of_release+duration_in_hours+
+              genre_action+genre_animation+genre_comedy+genre_documentary+
+              genre_drama+genre_family+genre_history+genre_horror+genre_romance+main_actor1_is_female+
+              main_actor2_is_female+total_number_of_actors)
+
+summary(lm_all)
+
+stargazer(lm_all,title = "Regression Results", 
+          covariate.labels=c("Budget(in Millions)","Month of Release","Year of Release","Duration in Hours","Genre Action","Genre Animation",
+                             "Genre Comedy", "Genre Documentary", "Genre Drama", "Genre Family","Genre History","Genre Horror",
+                             "Genre Romance", "Main Actor1 Female","Main Actor2 Female","Total Number of Actors"),
+          align =TRUE, dep.var.labels = c("IMDB Score"), type="html",notes.label="Significance Levels", out = "models.htm")
+
+```
+
+Residual Plots of Final Predictors
+```{r}
+##Plotting to check which variable is linear and non-linear##
+mreg = lm(imdb_score~budget_in_millions+month_of_release+year_of_release+duration_in_hours+total_number_of_actors)
+residualPlots(mreg)
+
+```
+Collinearity Test with Predictors
+```{r}
+## checking correlation
+quantvars = movies[,c(4,5,6,7,8,10,41,44,46,49,51)]
+corr_matrix = cor(quantvars)
+round(corr_matrix,2)
+# none of the variables are highly correlated so there is no collinearity issue
+
+#testing collinearity only for the relevant predictors
+quantvars2 = movies[,c(4,5,6,7,8,41)]
+corr_matrix2 = cor(quantvars2)
+round(corr_matrix2,2)
+
+#vif test with only quantitative variables
+mreg2 = lm(imdb_score~budget_in_millions+month_of_release+year_of_release+duration_in_hours+total_number_of_actors)
+vif(mreg2)
+#there is no collinearity in the model as none of the quantitative variables are highly correlated (>0.85)
+```
+Final Model: Polynomial Spline Regression
+
+```{r}
+require(caTools)
+require(methods)
+library(ggplot2)
+library(splines)
+library(boot)
+
+
+attach(movies)
+degrees = c(1,2,3,4)
+
+quantile_func <- function(x){
+  a = quantile(x, 0.5)
+  b = quantile(x, 0.33)
+  c = quantile(x, 0.66)
+  return(list(a,c(b,c)))
+}
+
+k1 <- quantile_func(budget_in_millions)
+k2 <- quantile_func(total_number_of_actors)
+k3 <- quantile_func(year_of_release)
+k4 <- quantile_func(duration_in_hours)
+
+
+df = NULL 
+for (a in 1:2){
+  for (b in 1:2){
+    for (c in 1:2){
+      for (d in 1:2){
+        for (e in degrees){
+          for (f in degrees){
+            for (g in degrees){
+              for (h in degrees){
+                set.seed(0)
+                regression=glm(imdb_score~bs(budget_in_millions,knots=k1[[a]],degree=e)+
+                                 bs(total_number_of_actors,knots = k2[[b]],degree =f)+
+                                 bs(year_of_release,knots = k3[[c]], degree = g)+
+                                 bs(duration_in_hours, knots = k4[[d]], degree = h)+
+                                 genre_action+genre_animation+genre_comedy+genre_documentary+genre_drama+genre_family+genre_horror+
+                                 genre_history+genre_romance+main_actor1_is_female+main_actor2_is_female+month_of_release)
+                mse=cv.glm(movies,regression,K=15)$delta[1]
+                df <- rbind(df,data.frame(mse,a,b,c,d,e,f,g,h)) 
+                #get rid of this if you don't want to see the progress 
+                print(mse)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+#total run time 
+proc.time() - ptm
+
+#save output to csv -- change path to where you want to save the file 
+write.csv(df, '/Users/duncanwang/Downloads/Midterm.csv')
+
+#extract row of df with the lowest MSE value, and corresponding optimal value of knots and degrees 
+df1 <- df[df$mse == min(df$mse),]
+df1
+
+# a1=2, a2=2, a3=1, a4=1, b1=3, b2=2, b3=1, b4=3, MSE=0.5821065
+
+set.seed(0)
+regression_final=glm(imdb_score~bs(budget_in_millions,knots=k1[[2]],degree=3)+
+                 bs(total_number_of_actors,knots = k2[[2]],degree =2)+
+                 bs(year_of_release,knots = k3[[1]], degree = 1)+
+                 bs(duration_in_hours, knots = k4[[1]], degree = 3)+
+                 genre_action+genre_animation+genre_comedy+genre_documentary+genre_drama+genre_family+genre_horror+
+                 genre_history+genre_romance+main_actor1_is_female+main_actor2_is_female+month_of_release)
+mse=cv.glm(movies,regression_final,K=15)$delta[1]
+print(mse)
+
+
+library(stargazer)
+stargazer(regression_final,title="Regression Results of the Final Model",
+          align=TRUE, dep.var.labels=c("IMDB Score"),
+          notes.label ="Significance Levels",
+          type = "html", out = "models.htm")
+
+```
+
+Heteroskedasticity Test
+```{r}
+library(car)
+plot(predict(regression_final),residuals(regression_final),col="red", pch = 16, xlab = "Predicted Value", ylab = "Difference from Acutal Value")
+abline(0,0,lty=2)
+# There is no HeteroSkedasticity in our model
+
+```
+
+Plot of Polynomial Splines
+```{r}
+
+#Spline Plots #
+
+library(ggpubr)
+library(ggplot2)
+require(methods)
+require(ggpubr)
+
+plot_budget = ggplot(movies,aes(y=imdb_score, x=budget_in_millions))
+scatter_budget = geom_point(colour = "grey",size=2)
+splinereg_1 = lm(imdb_score~bs(budget_in_millions,knots=k1[[2]],degree =3))
+spline1_new = geom_smooth(method ='lm',formula = y~bs(x,knots=k1[[2]],degree =3), aes(fill= "Degree = 3, Knots = 2"))
+vertical_lines_new=geom_vline(xintercept=k1[[2]], linetype="dashed", lwd=1)
+plot1 = plot_budget+scatter_budget+spline1_new+vertical_lines_new+theme(legend.position="top")+ylab("IMDb Score")+xlab("Budget (Millions)")
+
+
+plot_actors = ggplot(movies,aes(y=imdb_score, x= total_number_of_actors))
+scatter_actors = geom_point(colour = "grey",size=2)
+splinereg_2 = lm(imdb_score~bs(total_number_of_actors,knots=k2[[2]],degree =2))
+spline2_new =geom_smooth(method = 'lm',formula=y~bs(x,knots=k2[[2]],degree =2),aes(fill = "Degree = 2, Knots = 2"))
+vertical_lines_new=geom_vline(xintercept=k2[[2]], linetype="dashed", lwd=1)
+plot2 = plot_actors+scatter_actors+spline2_new+vertical_lines_new+theme(legend.position="top")+ylab("IMDb Score")+xlab("Total Number of Actors")
+
+plot_year = ggplot(movies,aes(y=imdb_score, x= year_of_release))
+scatter_year = geom_point(colour = "grey",size=2)
+splinereg_3 = lm(imdb_score~bs(year_of_release,knots=k3[[1]],degree =1))
+spline3_new = geom_smooth(method = 'lm',formula=y~bs(x,knots=k3[[1]],degree =1), aes(fill = "Degree = 1, Knots = 1"))
+vertical_lines_new=geom_vline(xintercept=k3[[1]], linetype="dashed", lwd=1)
+plot3 = plot_year+scatter_year+spline3_new+vertical_lines_new+theme(legend.position="top")+ylab("IMDb Score")+xlab("Year of Release")
+
+
+plot_duration = ggplot(movies,aes(y=imdb_score, x= duration_in_hours))
+scatter_duration = geom_point(colour = "grey",size=2)
+splinereg_4 = lm(imdb_score~bs(duration_in_hours,knots=k4[[1]],degree =3))
+spline4_new = geom_smooth(method = 'lm',formula=y~bs(x,knots=k4[[1]],degree =3), aes(fill = "Degree = 3, Knots = 1"))
+vertical_lines_new=geom_vline(xintercept=k4[[1]], linetype="dashed", lwd=1)
+plot4 = plot_duration+scatter_duration+spline4_new+vertical_lines_new+theme(legend.position="top")+ylab("IMDb Score")+xlab("Duration (Hours)")
+
+ggarrange(plot1, plot2, plot3, plot4, ncol = 2, nrow = 2)
+
+```
+
+Polynomial Spline Using Predictors Selected from LASSO Regression
+```{r}
+
+#LASSO regression can be found in the accompanied .py file
+#The predictors selected from the LASSO regression are: 
+#1 - year of release
+#2 - duration in hours
+#3 - total number of actors
+#4 - action genre
+#5 - comedy genre
+#6 - drama genre
+#7 - horror genre
+
+
+#Note: the final MSE is lower than that of the predictors selected by the multiple regression, and so the lowest MSE generated from this set of predictors is disregarded 
+attach(movies)
+degrees = c(1,2,3,4)
+
+quantile_func <- function(x){
+  a = quantile(x, 0.5)
+  b = quantile(x, 0.33)
+  c = quantile(x, 0.66)
+  return(list(a,c(b,c)))
+}
+
+k1 <- quantile_func(year_of_release)
+k2 <- quantile_func(duration_in_hours)
+k3 <- quantile_func(total_number_of_actors)
+
+df = NULL 
+for (a in 1:2){
+  for (b in 1:2){
+    for (c in 1:2){
+        for (e in degrees){
+          for (f in degrees){
+            for (g in degrees){
+                set.seed(0)
+                regression=glm(imdb_score~bs(year_of_release,knots=k1[[a]],degree=d)+
+                                 bs(duration_in_hours,knots = k2[[b]],degree =e)+
+                                 bs(total_number_of_actors,knots = k3[[c]], degree = f)+
+                                 genre_action+genre_comedy+genre_drama+genre_horror)
+                mse=cv.glm(movies2,regression,K=15)$delta[1]
+                df <- rbind(df,data.frame(mse,a,b,c,d,e,f,g,h)) 
+                #get rid of this if you don't want to see the progress 
+                print(mse)
+          }
+        }
+      }
+    }
+  }
+}
+#total run time 
+proc.time() - ptm
+
+#save output to csv -- change path to where you want to save the file 
+write.csv(df, '/Users/duncanwang/Downloads/Midterm.csv')
+
+#extract row of df with the lowest MSE value, and corresponding optimal value of knots and degrees 
+df1 <- df[df$mse == min(df$mse),]
+df1
+
+#Lowest MSE for variables selected by LASSO regression: 0.6496123
+#a=2, b=2, c=2,d=2,e=2,f=2,g=1,h=4
+
+#########CHECK FOR HETEROSKEDASTICITY OF THE MODEL########
+library(car)
+plot(predict(regression),residuals(regression),col="red", pch = 16, xlab = "Predicted Value", ylab = "Difference from Actual Value")
+abline(0,0,lty=2)
+# There is no HeteroSkedasticity in our model
+
+
+```
+
+Adding Derived Variables to the Model: Main Production Company
+```{r}
+#######ADDING DERIVED VARIABLES TO THE MODEL: MAIN PRODUCTION COMPANY##############
+
+#create a new variable to categorize main production companies into top 7, as the rest as "Other"
+#this predictor was initially added to the above two polynomial spline analyses but removed after we found it did not improve the prediction score 
+
+#view factors and take top 7 companies 
+summary(main_production_company)
+
+library(tidyverse)
+movies <- movies %>%
+  mutate(main_production_company_factors = ifelse(main_production_company == 'Universal Pictures' | main_production_company==  'Paramount Pictures' | main_production_company == 'Twentieth Century Fox Film Corporation' | 
+                                                  main_production_company == 'Columbia Pictures' | main_production_company == 'New Line Cinema' | main_production_company == 'Walt Disney Pictures'| main_production_company == 'Warner Bros.', as.character(main_production_company), 'Other'))
+
+#Turn into factors 
+attach(movies)
+movies$main_production_company_factors  = as.factor(movies$main_production_company_factors)
+
+```
+
+
+
+
+
